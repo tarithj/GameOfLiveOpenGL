@@ -22,11 +22,17 @@ func main() {
 	for !window.ShouldClose() {
 		t := time.Now()
 
-		for x := range cells {
-			for _, c := range cells[x] {
-				c.checkState(cells)
+		for x, cx := range cells {
+			for y, c := range cx {
+				c.checkState(cells, x, y)
 			}
 		}
+
+		// for x := range cells {
+		// 	for _, c := range cells[x] {
+		// 		c.checkState(cells)
+		// 	}
+		// }
 
 		draw(cells, window, program)
 

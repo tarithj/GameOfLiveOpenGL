@@ -12,9 +12,6 @@ type cell struct {
 
 	alive     bool
 	aliveNext bool
-
-	x int
-	y int
 }
 
 func makeCells() [][]*cell {
@@ -62,9 +59,6 @@ func newCell(x, y int) *cell {
 
 	return &cell{
 		drawable: makeVao(points),
-
-		x: x,
-		y: y,
 	}
 }
 
@@ -78,11 +72,11 @@ func (c *cell) draw() {
 }
 
 // checkState determines the state of the cell for the next tick of the game.
-func (c *cell) checkState(cells [][]*cell) {
+func (c *cell) checkState(cells [][]*cell, x int, y int) {
 	c.alive = c.aliveNext
 	c.aliveNext = c.alive
 
-	liveCount := c.liveNeighbors(cells)
+	liveCount := liveNeighbors(cells, x, y)
 	if c.alive {
 		// 1. Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
 		if liveCount < 2 {
@@ -107,7 +101,7 @@ func (c *cell) checkState(cells [][]*cell) {
 }
 
 // liveNeighbors returns the number of live neighbors for a cell.
-func (c *cell) liveNeighbors(cells [][]*cell) int {
+func liveNeighbors(cells [][]*cell, cx int, cy int) int {
 	var liveCount int
 	add := func(x, y int) {
 		// If we're at an edge, check the other side of the board.
@@ -127,14 +121,14 @@ func (c *cell) liveNeighbors(cells [][]*cell) int {
 		}
 	}
 
-	add(c.x-1, c.y)   // To the left
-	add(c.x+1, c.y)   // To the right
-	add(c.x, c.y+1)   // up
-	add(c.x, c.y-1)   // down
-	add(c.x-1, c.y+1) // top-left
-	add(c.x+1, c.y+1) // top-right
-	add(c.x-1, c.y-1) // bottom-left
-	add(c.x+1, c.y-1) // bottom-right
+	add(cx-1, cy)   // To the left
+	add(cx+1, cy)   // To the right
+	add(cx, cy+1)   // up
+	add(cx, cy-1)   // down
+	add(cx-1, cy+1) // top-left
+	add(cx+1, cy+1) // top-right
+	add(cx-1, cy-1) // bottom-left
+	add(cx+1, cy-1) // bottom-right
 
 	return liveCount
 }
