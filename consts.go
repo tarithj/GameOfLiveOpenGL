@@ -1,10 +1,10 @@
 package main
 
-const (
-	WindowWidth  = 800
-	WindowHeight = 800
-	rows         = 10
-	columns      = 10
-	threshold    = 0.15
-	fps          = 5
+var (
+	WindowWidth  int     = 800
+	WindowHeight int     = 800
+	rows         float32 = 10
+	columns      float32 = 10
+	threshold    float64 = 0.15
+	fps          int     = 5
 )
