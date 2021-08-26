@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-gl/gl/v4.1-core/gl"
 	"log"
 	"strings"
+
+	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 func compileShader(source string, shaderType uint32) (uint32, error) {
@@ -69,4 +70,3 @@ func initOpenGL() uint32 {
 	gl.LinkProgram(prog)
 	return prog
 }
-

@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/go-gl/gl/v4.1-core/gl"
 	"math/rand"
 	"time"
+
+	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 type cell struct {
@@ -16,11 +17,10 @@ type cell struct {
 	y int
 }
 
-
 func makeCells() [][]*cell {
 	rand.Seed(time.Now().UnixNano())
 
-	cells := make([][]*cell, rows, rows)
+	cells := make([][]*cell, rows)
 	for x := 0; x < rows; x++ {
 		for y := 0; y < columns; y++ {
 			c := newCell(x, y)
@@ -36,7 +36,7 @@ func makeCells() [][]*cell {
 }
 
 func newCell(x, y int) *cell {
-	points := make([]float32, len(square), len(square))
+	points := make([]float32, len(square))
 	copy(points, square)
 
 	for i := 0; i < len(points); i++ {
@@ -76,7 +76,6 @@ func (c *cell) draw() {
 	gl.BindVertexArray(c.drawable)
 	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
 }
-
 
 // checkState determines the state of the cell for the next tick of the game.
 func (c *cell) checkState(cells [][]*cell) {
