@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/go-gl/gl/v4.1-core/gl"
 	"math/rand"
 	"time"
+
+	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 type cell struct {
@@ -11,60 +12,47 @@ type cell struct {
 
 	alive     bool
 	aliveNext bool
-
-	x int
-	y int
 }
-
 
 func makeCells() [][]*cell {
 	rand.Seed(time.Now().UnixNano())
+	intcolumns := int(columns)
+	introws := int(rows)
 
-	cells := make([][]*cell, rows, rows)
-	for x := 0; x < rows; x++ {
-		for y := 0; y < columns; y++ {
+	cells := make([][]*cell, introws)
+	for x := 0; x < introws; x++ {
+		cells[x] = make([]*cell, intcolumns)
+		for y := 0; y < intcolumns; y++ {
 			c := newCell(x, y)
 
 			c.alive = rand.Float64() < threshold
 			c.aliveNext = c.alive
 
-			cells[x] = append(cells[x], c)
+			cells[x][y] = c
 		}
 	}
 
 	return cells
 }
 
+const HalfBoardWidth = float32(0.95)
+
 func newCell(x, y int) *cell {
-	points := make([]float32, len(square), len(square))
+	points := make([]float32, len(square))
 	copy(points, square)
 
-	for i := 0; i < len(points); i++ {
-		var position float32
-		var size float32
-		switch i % 3 {
-		case 0:
-			size = 1.0 / float32(columns)
-			position = float32(x) * size
-		case 1:
-			size = 1.0 / float32(rows)
-			position = float32(y) * size
-		default:
-			continue
-		}
+	sizex := 2.0 / columns
+	sizey := 2.0 / rows
+	positionx := float32(x) * sizex
+	positiony := float32(y) * sizey
 
-		if points[i] < 0 {
-			points[i] = (position * 2) - 1
-		} else {
-			points[i] = ((position + size) * 2) - 1
-		}
+	for ix := 0; ix < len(points); ix += 3 {
+		points[ix] = points[ix]*sizex + positionx - HalfBoardWidth
+		points[ix+1] = points[ix+1]*sizey + positiony - HalfBoardWidth
 	}
 
 	return &cell{
 		drawable: makeVao(points),
-
-		x: x,
-		y: y,
 	}
 }
 
@@ -74,31 +62,30 @@ func (c *cell) draw() {
 	}
 
 	gl.BindVertexArray(c.drawable)
-	gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
+	gl.DrawArrays(gl.TRIANGLE_FAN, 0, 4)
 }
 
-
 // checkState determines the state of the cell for the next tick of the game.
-func (c *cell) checkState(cells [][]*cell) {
+func (c *cell) checkState(cells [][]*cell, x int, y int) {
 	c.alive = c.aliveNext
 	c.aliveNext = c.alive
 
-	liveCount := c.liveNeighbors(cells)
+	liveCount := liveNeighbors(cells, x, y)
 	if c.alive {
-		// 1. Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
-		if liveCount < 2 {
-			c.aliveNext = false
-		}
 
-		// 2. Any live cell with two or three live neighbours lives on to the next generation.
-		if liveCount == 2 || liveCount == 3 {
+		if liveCount < 2 {
+			// 1. Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
+			c.aliveNext = false
+
+		} else if liveCount > 3 {
+			// 2. Any live cell with more than three live neighbours dies, as if by overpopulation.
+			c.aliveNext = false
+
+		} else {
+			// 3. Any live cell with two or three live neighbours lives on to the next generation.
 			c.aliveNext = true
 		}
 
-		// 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
-		if liveCount > 3 {
-			c.aliveNext = false
-		}
 	} else {
 		// 4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 		if liveCount == 3 {
@@ -108,7 +95,7 @@ func (c *cell) checkState(cells [][]*cell) {
 }
 
 // liveNeighbors returns the number of live neighbors for a cell.
-func (c *cell) liveNeighbors(cells [][]*cell) int {
+func liveNeighbors(cells [][]*cell, cx int, cy int) int {
 	var liveCount int
 	add := func(x, y int) {
 		// If we're at an edge, check the other side of the board.
@@ -128,14 +115,14 @@ func (c *cell) liveNeighbors(cells [][]*cell) int {
 		}
 	}
 
-	add(c.x-1, c.y)   // To the left
-	add(c.x+1, c.y)   // To the right
-	add(c.x, c.y+1)   // up
-	add(c.x, c.y-1)   // down
-	add(c.x-1, c.y+1) // top-left
-	add(c.x+1, c.y+1) // top-right
-	add(c.x-1, c.y-1) // bottom-left
-	add(c.x+1, c.y-1) // bottom-right
+	add(cx-1, cy)   // To the left
+	add(cx+1, cy)   // To the right
+	add(cx, cy+1)   // up
+	add(cx, cy-1)   // down
+	add(cx-1, cy+1) // top-left
+	add(cx+1, cy+1) // top-right
+	add(cx-1, cy-1) // bottom-left
+	add(cx+1, cy-1) // bottom-right
 
 	return liveCount
 }

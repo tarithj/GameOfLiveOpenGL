@@ -1,13 +1,12 @@
 package main
 
 import (
-	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/go-gl/glfw/v3.2/glfw"
 	"runtime"
 	"time"
+
+	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/glfw/v3.2/glfw"
 )
-
-
 
 func main() {
 	runtime.LockOSThread()
@@ -17,19 +16,23 @@ func main() {
 
 	program := initOpenGL()
 
-
 	// vao := makeVao(square)
 	cells := makeCells()
-
 
 	for !window.ShouldClose() {
 		t := time.Now()
 
-		for x := range cells {
-			for _, c := range cells[x] {
-				c.checkState(cells)
+		for x, cx := range cells {
+			for y, c := range cx {
+				c.checkState(cells, x, y)
 			}
 		}
+
+		// for x := range cells {
+		// 	for _, c := range cells[x] {
+		// 		c.checkState(cells)
+		// 	}
+		// }
 
 		draw(cells, window, program)
 
