@@ -35,20 +35,18 @@ func makeCells() [][]*cell {
 	return cells
 }
 
-const HalfBoardWidth = float32(0.95)
-
 func newCell(x, y int) *cell {
 	points := make([]float32, len(square))
 	copy(points, square)
 
-	sizex := 2.0 / columns
-	sizey := 2.0 / rows
-	positionx := float32(x) * sizex
-	positiony := float32(y) * sizey
+	sizex := 2.0 / rows
+	sizey := 2.0 / columns
+	positionx := (float32(x) * sizex) - 1
+	positiony := (float32(y) * sizey) - 1
 
 	for ix := 0; ix < len(points); ix += 3 {
-		points[ix] = points[ix]*sizex + positionx - HalfBoardWidth
-		points[ix+1] = points[ix+1]*sizey + positiony - HalfBoardWidth
+		points[ix] = points[ix]*sizex + positionx
+		points[ix+1] = points[ix+1]*sizey + positiony
 	}
 
 	return &cell{
